@@ -1,2 +1,1 @@
 # ue_dobre_praktyki_programowania
-testaaaaa
