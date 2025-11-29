@@ -1,6 +1,6 @@
 import csv
 import os
-from models import Movie
+from models.movie_models import Movie
 
 def read_csv_to_objects(csv_file_path: str, model_class):
     if not os.path.exists(csv_file_path):
