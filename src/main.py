@@ -1,21 +1,15 @@
 import os
 from fastapi import FastAPI
-from models.movie_models import Movie
-from utils.csv_reader import read_csv_to_objects
+from routes.loaders import router as loader_router
+from routes.movie_routes import router as movie_router
+from routes.link_routes import router as link_router
+from routes.tag_routes import router as tag_router
+from routes.rating_routes import router as rating_router
 
 app = FastAPI()
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-MOVIES_CSV = os.path.join(BASE_DIR, "src/database", "movies.csv")
-
-@app.get("/")
-def read_root():
-    return {"message": "Hello, world!"}
-
-@app.get("/movies")
-def get_movies():
-    movies = read_csv_to_objects(MOVIES_CSV, Movie)
-    if isinstance(movies, dict) and "error" in movies:
-        return movies
-    return [m.__dict__ for m in movies]
+app.include_router(movie_router)
+app.include_router(link_router)
+app.include_router(tag_router)
+app.include_router(rating_router)
+app.include_router(loader_router)

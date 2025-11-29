@@ -4,6 +4,9 @@ sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
 
 from database.db import Base
+import models.link_models
+import models.rating_models
+import models.tag_models
 import models.movie_models 
 
 from logging.config import fileConfig
