@@ -20,7 +20,7 @@ def test_get_movie_not_found(client):
     assert response.status_code == 404
 
 def test_create_movie(client, db_session):
-    payload = {"movieId": 3, "title": "New Movie", "genres": "Horror"}
+    payload = {"title": "New Movie", "genres": "Horror"}
     response = client.post("/movies/", json=payload)
     assert response.status_code == 200
     data = response.json()

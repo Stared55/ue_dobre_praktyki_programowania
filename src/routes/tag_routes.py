@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from utils.session import get_db
-from models.movie_models import Tag
+from models.tag_models import Tag
 from utils.pagination import pagination_params
 
 router = APIRouter(prefix="/tags", tags=["Tags"])

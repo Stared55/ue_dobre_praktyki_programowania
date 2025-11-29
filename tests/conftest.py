@@ -6,7 +6,10 @@ from sqlalchemy.orm import sessionmaker
 from database.db import Base
 from main import app
 from utils.session import get_db
-from models.movie_models import Movie, Link, Rating, Tag
+from models.movie_models import Movie
+from models.link_models import Link
+from models.rating_models import Rating
+from models.tag_models import Tag
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 
