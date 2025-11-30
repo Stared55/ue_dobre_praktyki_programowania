@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List
 
 from utils.session import get_db
 from models.link_models import Link
@@ -24,7 +23,7 @@ def get_link(link_id: int, db: Session = Depends(get_db)):
 
 @router.post("/", response_model=LinkSchema)
 def create_link(link: LinkCreate, db: Session = Depends(get_db)):
-    db_link = Link(**link.dict())
+    db_link = Link(**link.model_dump())
     db.add(db_link)
     db.commit()
     db.refresh(db_link)
@@ -35,7 +34,8 @@ def update_link(link_id: int, link: LinkUpdate, db: Session = Depends(get_db)):
     db_link = db.query(Link).filter(Link.id == link_id).first()
     if not db_link:
         raise HTTPException(status_code=404, detail="Link not found")
-    for key, value in link.dict().items():
+    update_data = link.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(db_link, key, value)
     db.commit()
     db.refresh(db_link)
@@ -48,4 +48,4 @@ def delete_link(link_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Link not found")
     db.delete(db_link)
     db.commit()
-    return {"status": "deleted"}
+    return {"status": "deleted", "id": link_id}

@@ -10,7 +10,9 @@ class LinkCreate(LinkBase):
     pass
 
 class LinkUpdate(LinkBase):
-    pass
+    movieId: Optional[int] = None
+    imdbId: Optional[int] = None
+    tmdbId: Optional[int] = None
 
 class LinkSchema(LinkBase):
     id: int

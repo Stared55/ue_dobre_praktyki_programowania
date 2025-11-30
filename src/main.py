@@ -17,7 +17,7 @@ async def lifespan(app: FastAPI):
     yield
     logger.info("🛑 FastAPI server is shutting down...")
 
-app = FastAPI(description="developed by stared55", title="Dobre Praktyki Programowania API", version="1.0.0", lifespan=lifespan)
+app = FastAPI(description="developed by Radosław Staroszyński", title="Dobre Praktyki Programowania API", version="1.0.0", lifespan=lifespan)
 
 app.include_router(movie_router)
 app.include_router(link_router)
