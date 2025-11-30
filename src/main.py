@@ -1,0 +1,3 @@
+FILE_NAME = "tasks.csv"
+CHECK_INTERVAL = 5  
+TASK_DURATION = 30 
