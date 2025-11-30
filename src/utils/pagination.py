@@ -6,3 +6,4 @@ def pagination_params(
     limit: int = Query(10, ge=1)
 ) -> Tuple[int, int]:
     return skip, limit
+

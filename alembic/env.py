@@ -8,6 +8,7 @@ import models.link_models
 import models.rating_models
 import models.tag_models
 import models.movie_models 
+import models.user_models
 
 from logging.config import fileConfig
 
