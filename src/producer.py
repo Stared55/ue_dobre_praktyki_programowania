@@ -1,24 +1,37 @@
-import csv
-import os
+import sqlite3
 import uuid
+import sys
 
-from main import FILE_NAME
+DB = "queue.db"
+
+def init_db():
+    conn = sqlite3.connect(DB)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS tasks (
+            id TEXT PRIMARY KEY,
+            status TEXT NOT NULL,
+            description TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    conn.commit()
+    conn.close()
 
 def add_task(description):
-    file_exists = os.path.isfile(FILE_NAME)
-    
-    with open(FILE_NAME, mode='a', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-        if not file_exists:
-            writer.writerow(['id', 'status', 'description'])
-        task_id = str(uuid.uuid4())
-        writer.writerow([task_id, 'pending', description])
-        print(f"Added task: {task_id} - {description}")
+    conn = sqlite3.connect(DB)
+    task_id = str(uuid.uuid4())
+    conn.execute(
+        "INSERT INTO tasks (id, status, description) VALUES (?, ?, ?)",
+        (task_id, "pending", description)
+    )
+    conn.commit()
+    conn.close()
+    print(f"Task added: {task_id}")
 
 if __name__ == "__main__":
-    import sys
     if len(sys.argv) < 2:
-        print("Usage: python3 producer.py 'Task description'")
-    else:
-        task_desc = sys.argv[1]
-        add_task(task_desc)
+        print("Usage: python3 producer.py \"Task description\"")
+        sys.exit(1)
+
+    init_db()
+    add_task(sys.argv[1])

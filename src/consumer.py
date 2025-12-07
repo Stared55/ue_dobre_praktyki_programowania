@@ -1,42 +1,76 @@
-import csv
+import sqlite3
 import time
-import os
 
-from main import FILE_NAME, CHECK_INTERVAL, TASK_DURATION
+DB = "queue.db"
+CHECK_INTERVAL = 5
+TASK_DURATION = 30
 
-def read_tasks():
-    if not os.path.isfile(FILE_NAME):
-        return []
-    with open(FILE_NAME, mode='r', newline='', encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        return list(reader)
+def init_db():
+    conn = sqlite3.connect(DB)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS tasks (
+            id TEXT PRIMARY KEY,
+            status TEXT NOT NULL,
+            description TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    conn.commit()
+    conn.close()
 
-def write_tasks(tasks):
-    with open(FILE_NAME, mode='w', newline='', encoding='utf-8') as file:
-        fieldnames = ['id', 'status', 'description']
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(tasks)
+def acquire_task():
+    conn = sqlite3.connect(DB)
+    conn.isolation_level = None
+    cursor = conn.cursor()
 
-def consume_task():
-    tasks = read_tasks()
-    for task in tasks:
-        if task['status'] == 'pending':
-            print(f"Consuming task {task['id']}: {task['description']}")
-            task['status'] = 'in_progress'
-            write_tasks(tasks)
+    cursor.execute("BEGIN IMMEDIATE")
 
-            time.sleep(TASK_DURATION)
+    cursor.execute(
+        "SELECT id, description FROM tasks WHERE status = 'pending' ORDER BY created_at LIMIT 1"
+    )
+    row = cursor.fetchone()
 
-            task['status'] = 'done'
-            write_tasks(tasks)
-            print(f"Task {task['id']} done.")
-            return True
-    return False
+    if not row:
+        conn.rollback()
+        conn.close()
+        return None
 
-if __name__ == "__main__":
+    task_id, desc = row
+
+    cursor.execute(
+        "UPDATE tasks SET status = 'in_progress' WHERE id = ?",
+        (task_id,)
+    )
+
+    conn.commit()
+    conn.close()
+    return task_id, desc
+
+def complete_task(task_id):
+    conn = sqlite3.connect(DB)
+    conn.execute(
+        "UPDATE tasks SET status = 'done' WHERE id = ?",
+        (task_id,)
+    )
+    conn.commit()
+    conn.close()
+
+def run():
+    init_db()
     print("Consumer running...")
     while True:
-        task_found = consume_task()
-        if not task_found:
+        task = acquire_task()
+        if not task:
             time.sleep(CHECK_INTERVAL)
+            continue
+
+        task_id, desc = task
+        print(f"Processing: {task_id} - {desc}")
+
+        time.sleep(TASK_DURATION)
+
+        complete_task(task_id)
+        print(f"Done: {task_id}")
+
+if __name__ == "__main__":
+    run()

@@ -33,3 +33,5 @@ dist/
 # Temporary files
 *.swp
 *.swo
+
+queue.db
