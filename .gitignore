@@ -33,3 +33,9 @@ dist/
 # Temporary files
 *.swp
 *.swo
+
+raw_data/photos/
+raw_data/annotations/
+debug_failures/*
+all_readings.txt
+bledy_ocr.txt
