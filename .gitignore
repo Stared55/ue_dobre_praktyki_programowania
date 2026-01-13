@@ -34,4 +34,9 @@ dist/
 *.swp
 *.swo
 
-queue.db
+raw_data/photos/
+raw_data/annotations/
+debug_failures/*
+debug_crops/*
+all_readings.txt
+bledy_ocr.txt
