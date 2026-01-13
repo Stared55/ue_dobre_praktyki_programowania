@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  service-a:
+    build: ./service_a
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./service_a:/app
+
+  service-b-api:
+    build: ./service_b
+    command: uvicorn api:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8002:8000"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+
+  service-b-worker:
+    build: ./service_b
+    command: python worker.py
+    deploy:
+      replicas: 2
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - SERVICE_A_URL=http://service-a:8000/results/

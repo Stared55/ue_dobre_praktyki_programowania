@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+pika
+requests
+numpy
+opencv-python-headless
+ultralytics
+httpx
+pytest
