@@ -1,64 +1,27 @@
-# 🚗 Automatic License Plate Recognition (ALPR)
+## 🏃‍♂️ How to Run
 
-Projekt realizujący detekcję oraz rozpoznawanie tekstu (OCR) na polskich tablicach rejestracyjnych. Rozwiązanie opiera się na bibliotece **EasyOCR** i zawiera wbudowany moduł automatycznej oceny jakości algorytmu (dokładność vs czas przetwarzania).
+Open **Separate terminal windows** in the project directory.
 
----
-
-## 📋 Opis projektu
-
-Głównym celem projektu jest stworzenie systemu, który:
-1. **Lokalizuje** tablicę rejestracyjną na zdjęciu (Detekcja).
-2. **Odczytuje** numer rejestracyjny (OCR).
-3. **Weryfikuje** wyniki względem bazy danych (Ground Truth z plików XML).
-4. **Ocenia** działanie algorytmu na podstawie wzoru uwzględniającego dokładność i czas działania.
-
-## 🛠️ Technologie
-
-* **Python 3.13**
-* **EasyOCR** (Silnik OCR oparty na Deep Learningu)
-* **OpenCV** (Przetwarzanie obrazu)
-* **XML ElementTree** (Parsowanie adnotacji)
-
-## 📂 Struktura katalogów
-
-Aby projekt działał poprawnie, pliki muszą być ułożone w następujący sposób:
-
-```text
-├── main.py                # Główny skrypt uruchamiający testy
-├── README.md              # Dokumentacja projektu
-└── raw_data/              # Folder z danymi
-    └── annotations/   
-        ├── annotations.xml    # Plik z adnotacjami (Ground Truth)
-    └── photos/
-        ├── 1.jpg              # Zdjęcia pojazdów...
-        ├── 2.jpg
-        └── ...
-```
-
-## 🚀 Instalacja i Uruchomienie
-
-1. **Sklonuj repozytorium** (lub pobierz pliki).
-2. **Zainstaluj wymagane biblioteki**:
-
+### Terminal 1: Start Redis
+Start the Redis container to handle the queue.
 ```bash
-pip install easyocr opencv-python-headless numpy lxml
+docker run -d -p 6379:6379 redis
 ```
 
-*(Uwaga dla użytkowników macOS: Jeśli wystąpi błąd SSL, uruchom skrypt `Install Certificates.command` w folderze instalacyjnym Pythona).*
+### Terminal 2: Start the AI Worker
+This process loads the heavy AI models and processes images. Note: We use --pool=solo to prevent memory crashes on macOS/Linux with PyTorch.
+```bash
+python3 -m celery -A tasks worker --loglevel=info --pool=solo
+```
 
-3. **Uruchom projekt**:
-
+### Terminal 3: Start the AI Worker
+python3 -m celery -A tasks worker --loglevel=info --pool=solo
 ```bash
 python3 main.py
 ```
 
-### 1. IoU (Intersection over Union)
-Mierzy precyzję detekcji ramki tablicy.
-
-$$IoU = \frac{\text{Obszar Wspólny}}{\text{Całkowity Obszar Ramek}}$$
-
-* **Wynik > 0.5** uznawany jest za poprawną detekcję.
-
-## 👥 Autorzy
-* Radosław Staroszyński
-* Piotr Stefański (Właściciel datasetu)
+### Terminal 4: celery -A tasks flower
+To visualize the queue and worker status, you can use Flower.
+```bash
+celery -A tasks flower
+```
